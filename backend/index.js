@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const SECRET_KEY = 'cafeteria';
+const SECRET_KEY = process.env.SECRET_KEY;
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 app.use(cors());
@@ -17,7 +17,7 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
-mongoose.connect('mongodb+srv://cafeteria:harry@cluster0.gwcqa.mongodb.net/user')
+mongoose.connect(`mongodb+srv://cafeteria:${process.env.MONGO_PASS}@cluster0.gwcqa.mongodb.net/user`)
   .then(() => console.log('Connected to MongoDB'))
   .catch(error => console.error('Error connecting to MongoDB:', error));
 
