@@ -5,17 +5,22 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState('user');
   useEffect(() => {
-    const token = localStorage.getItem("authToken"); 
-    if (token) {
-      setIsLoggedIn(true);
-    }
-  }, []);
+  const token = localStorage.getItem("authToken"); 
+  if (token) {
+    setIsLoggedIn(true);
+  }
+
   const r = localStorage.getItem('role');
-  setRole(r);
+  if (r) {
+    setRole(r);
+  }
+}, []);
+
   const handleLogout = () => {
     localStorage.removeItem("authToken"); 
     setIsLoggedIn(false);
     navigate('/');
+    setRole('user');
     window.location.reload(); 
   };
 
