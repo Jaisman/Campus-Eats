@@ -26,7 +26,7 @@ export default function Signup() {
       if(response.ok){
         alert('Sign up successfull!');
         console.log('Server Response:', data);
-        navigate('/');
+        navigate('/login');
       }else {
         alert(data.error || 'Signup Failed');
       }

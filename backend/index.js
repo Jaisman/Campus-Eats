@@ -6,18 +6,19 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY;
 const nodemailer = require('nodemailer');
-require('dotenv').config();
 app.use(cors());
 app.use(express.json());
-console.log(process.env.EMAIL_USER, process.env.EMAIL_PASS);
+console.log(SECRET_KEY);
+// console.log(process.env.EMAIL_USER, process.env.EMAIL_PASS);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
-mongoose.connect(`mongodb+srv://cafeteria:${process.env.MONGO_PASS}@cluster0.gwcqa.mongodb.net/user`)
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(error => console.error('Error connecting to MongoDB:', error));
 
@@ -30,12 +31,10 @@ mongoose.connect(`mongodb+srv://cafeteria:${process.env.MONGO_PASS}@cluster0.gwc
       if (existing) {
         return res.status(400).json({ message: 'User already exists' });
       }
-      
-      // Hash the password before saving
+
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-      
-      // Save the new user with the hashed password
+
       const newUser = new User({
         username,
         email,

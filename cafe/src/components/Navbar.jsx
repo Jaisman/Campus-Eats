@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom';
 export default function Navbar() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  const [role, setRole] = useState('user');
   useEffect(() => {
     const token = localStorage.getItem("authToken"); 
     if (token) {
       setIsLoggedIn(true);
     }
   }, []);
-
+  const r = localStorage.getItem('role');
+  setRole(r);
   const handleLogout = () => {
     localStorage.removeItem("authToken"); 
     setIsLoggedIn(false);
@@ -44,6 +45,13 @@ export default function Navbar() {
               <li className="nav-item">
                 <a className="nav-link" href="/menu" style={{color:'white', fontWeight:'700', fontFamily:'cursive'}}>Menu</a>
               </li>
+              {
+                role==='admin'?(
+                    <li className="nav-item">
+                <a className="nav-link" href="/orders" style={{color:'white', fontWeight:'700', fontFamily:'cursive'}}>Orders</a>
+              </li>
+                ):(<p/>)
+              }
             </ul>
           </div>
         </div>
