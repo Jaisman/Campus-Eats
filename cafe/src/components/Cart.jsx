@@ -22,7 +22,7 @@ const FoodCartPage = () => {
   const user = storedUser ? JSON.parse(storedUser) : {};
 
   // Calculate totals
-  const subtotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  const subtotal = cart.reduce((total, item) => total + Number(item.Price) * item.quantity, 0);
   const tax = subtotal * 0.08;
   const deliveryFee = 3.99;
   const total = subtotal + tax + deliveryFee;
@@ -98,28 +98,28 @@ const FoodCartPage = () => {
                   </div>
                 ) : (
                   cart.map((item) => (
-                    <Row key={item.id} className="mb-3 py-3 border-bottom align-items-center">
+                    <Row key={item._id} className="mb-3 py-3 border-bottom align-items-center">
                       <Col md={6} className="d-flex align-items-center">
                         <img
-                          src={item.image}
-                          alt={item.name}
+                          src={item.Image}
+                          alt={item.Name}
                           className="me-3"
                           style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                         />
                         <div>
-                          <h6 className="mb-0">{item.name}</h6>
-                          <Button variant="link" className="text-danger p-0" onClick={() => removeFromCart(item.id)}>
+                          <h6 className="mb-0">{item.Name}</h6>
+                          <Button variant="link" className="text-danger p-0" onClick={() => removeFromCart(item._id)}>
                             Remove
                           </Button>
                         </div>
                       </Col>
-                      <Col md={2} className="text-center">${item.price.toFixed(2)}</Col>
+                      <Col md={2} className="text-center">${Number(item.Price).toFixed(2)}</Col>
                       <Col md={2}>
                         <div className="d-flex justify-content-center align-items-center">
                           <Button
                             variant="outline-secondary"
                             size="sm"
-                            onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                            onClick={() => updateQuantity(item._id, Math.max(1, item.quantity - 1))}
                           >
                             -
                           </Button>
@@ -130,7 +130,7 @@ const FoodCartPage = () => {
                             onChange={(e) => {
                               const value = parseInt(e.target.value);
                               if (!isNaN(value) && value > 0) {
-                                updateQuantity(item.id, value);
+                                updateQuantity(item._id, value);
                               }
                             }}
                             min="1"
@@ -140,13 +140,13 @@ const FoodCartPage = () => {
                           <Button
                             variant="outline-secondary"
                             size="sm"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() => updateQuantity(item._id, item.quantity + 1)}
                           >
                             +
                           </Button>
                         </div>
                       </Col>
-                      <Col md={2} className="text-center">${(item.price * item.quantity).toFixed(2)}</Col>
+                      <Col md={2} className="text-center">${(Number(item.Price) * item.quantity).toFixed(2)}</Col>
                     </Row>
                   ))
                 )}

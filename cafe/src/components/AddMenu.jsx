@@ -3,18 +3,29 @@ import React, { useState, useEffect} from 'react';
 import Navbar from './Navbar';
 import { useMenu } from '../context/MenuContext';
 import { useNavigate } from 'react-router-dom';
+import axios from "axios";
 
 const AddMenu = () => {
-  const { menuData, updateMenu } = useMenu();
+  const [menuData, setMenuData] = useState([]);
   const navigate = useNavigate();
   const [newCategoryName, setNewCategoryName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [newItem, setNewItem] = useState({
-    name: '',
-    price: '',
-    description: '',
-    image: ''
+    Name: '',
+    Price: '',
+    Description: '',
+    Image: ''
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [formData, setFormData] = useState({
+    Name: '',
+    Price: '',
+    Description: '',
+    Image: '',
+  });
+
+  const [items, setItems] = useState([]);
   useEffect(() => {
       const storedUser = localStorage.getItem('user');
       const user = storedUser ? JSON.parse(storedUser) : null;
@@ -23,20 +34,55 @@ const AddMenu = () => {
       }
     }, [navigate]);
 
-  const handleAddCategory = (e) => {
-    e.preventDefault();
-    if (!newCategoryName.trim()) return;
-    
-    const newId = menuData.length > 0 ? Math.max(...menuData.map(c => c.id)) + 1 : 1;
-    const newCategory = {
-      id: newId,
-      name: newCategoryName.toLowerCase(),
-      items: []
-    };
-
-    updateMenu([...menuData, newCategory]);
-    setNewCategoryName('');
+  useEffect(() => {
+  const fetchMenu = async () => {
+    try {
+      const res = await axios.get('http://localhost:8080/fetch-categories');
+      if (Array.isArray(res.data)) {
+        setMenuData(res.data);
+      } else {
+        console.error('Unexpected menu format:', res.data);
+        setMenuData([]); // fallback
+      }
+    } catch (error) {
+      console.error('Failed to fetch menu:', error);
+      setMenuData([]); // fallback
+    }
   };
+
+  fetchMenu();
+}, []);
+
+
+const handleAddCategory = async (e) => {
+  e.preventDefault();
+  if (!newCategoryName.trim()) return;
+
+  try {
+    const response = await axios.post('http://localhost:8080/api/categories', {
+      Name: newCategoryName.toLowerCase()
+    });
+
+    const createdCategory = response.data;
+    setNewCategoryName('');
+  } catch (error) {
+    console.error("Failed to add category:", error);
+  }
+};
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      if (!selectedCategory) return;
+      try {
+        const res = await axios.get(`http://localhost:8080/api/categories/${selectedCategory}/items`);
+        console.log(res);
+        setItems(res.data);
+      } catch (err) {
+        console.error('Error fetching items:', err);
+      }
+    };
+    fetchItems();
+  }, [selectedCategory]);
 
   const handleSelectCategory = (categoryId) => {
     setSelectedCategory(categoryId);
@@ -44,64 +90,87 @@ const AddMenu = () => {
 
   // Handle changes for new item inputs
   const handleNewItemChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "image" && files.length > 0) {
-      const file = files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewItem({
-          ...newItem,
-          image: reader.result  
-        });
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setNewItem({
-        ...newItem,
-        [name]: value
-      });
-    }
+    const { name, value } = e.target;
+    setNewItem(prev => ({ ...prev, [name]: value }));
   };
     
   // Add new item to the selected category
-  const handleAddItem = (e) => {
-    e.preventDefault();
-    if (!selectedCategory || !newItem.name || !newItem.price) return;
-    
-    const updatedMenuData = menuData.map(category => {
-      if (category.id === selectedCategory) {
-        const newItemId = category.items.length > 0 ? Math.max(...category.items.map(item => item.id)) + 1 : 1;
-        return {
-          ...category,
-          items: [...category.items, {
-            id: newItemId,
-            name: newItem.name,
-            price: parseFloat(newItem.price),
-            description: newItem.description,
-            image: newItem.image
-          }]
-        };
-      }
-      return category;
-    });
-    
-    updateMenu(updatedMenuData);
-    setNewItem({ name: '', price: '', description: '', image: '' });
-  };
+  const handleAddItem = async (e) => {
+  e.preventDefault();
+
+  try {
+    const payload = {
+      ...newItem,
+      category: selectedCategory
+    };
+
+    const res = await axios.post('http://localhost:8080/api/items', payload);
+    console.log(payload);
+
+    if (res.status === 201) {
+      alert('Item added!');
+      setItems(prev => [...prev, res.data.item]);
+      setNewItem({ Name: '', Price: '', Description: '', Image: '' });
+    }
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.error || 'Failed to add item');
+  }
+};
+
 
   // Remove an item from the selected category
-  const handleRemoveItem = (categoryId, itemId) => {
-    const updatedMenuData = menuData.map(category => {
-      if (category.id === categoryId) {
-        return {
-          ...category,
-          items: category.items.filter(item => item.id !== itemId)
-        };
-      }
-      return category;
-    });
-    updateMenu(updatedMenuData);
+ const handleRemoveItem = async (categoryId, itemId) => {
+  try {
+    await axios.delete(`http://localhost:8080/categories/${categoryId}/items/${itemId}`);
+    alert('Item deleted successfully');
+  } catch (err) {
+    console.error('Failed to delete item:', err);
+    alert('Failed to delete item');
+  }
+};
+
+  const handleUpdateItem = (categoryId, itemId) => {
+    const itemToEdit = items.find(item => item._id === itemId);
+    if (itemToEdit) {
+      setEditingItem(itemToEdit);
+      setFormData({
+        Name: itemToEdit.Name,
+        Price: itemToEdit.Price,
+        Description: itemToEdit.Description,
+        Image: itemToEdit.Image,
+      });
+      setIsModalOpen(true);
+    }
   };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const updateItem = async (itemId, data) => {
+    const res = await axios.put(`http://localhost:8080/items/${itemId}`, data);
+    return res.data;
+  };
+
+const submitUpdate = async () => {
+  try {
+    const updatedItem = await updateItem(editingItem._id, formData);
+
+    setIsModalOpen(false);
+
+    // Update the local items state by replacing the updated item
+    setItems(prevItems =>
+      prevItems.map(item => (item._id === updatedItem._id ? updatedItem : item))
+    );
+
+    alert('Item updated successfully');
+  } catch (err) {
+    console.error('Update failed', err);
+    alert('Update failed');
+  }
+};
+
 
   return (
     <>
@@ -133,12 +202,12 @@ const AddMenu = () => {
                 <div className="list-group">
                   {menuData.map(category => (
                     <button
-                      key={category.id}
+                      key={category._id}
                       className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${selectedCategory === category.id ? 'active' : ''}`}
-                      onClick={() => handleSelectCategory(category.id)}
+                      onClick={() => handleSelectCategory(category._id)}
                     >
                       {category.name}
-                      <span className="badge bg-secondary rounded-pill">{category.items.length}</span>
+                      <span className="badge bg-secondary rounded-pill">{category.Name}</span>
                     </button>
                   ))}
                 </div>
@@ -166,8 +235,8 @@ const AddMenu = () => {
                             type="text"
                             className="form-control"
                             placeholder="Item Name"
-                            name="name"
-                            value={newItem.name}
+                            name="Name"
+                            value={newItem.Name}
                             onChange={handleNewItemChange}
                             required
                           />
@@ -178,8 +247,8 @@ const AddMenu = () => {
                             step="0.01"
                             className="form-control"
                             placeholder="Price"
-                            name="price"
-                            value={newItem.price}
+                            name="Price"
+                            value={newItem.Price}
                             onChange={handleNewItemChange}
                             required
                           />
@@ -189,17 +258,26 @@ const AddMenu = () => {
                         <textarea
                           className="form-control"
                           placeholder="Description"
-                          name="description"
-                          value={newItem.description}
+                          name="Description"
+                          value={newItem.Description}
                           onChange={handleNewItemChange}
                           rows="2"
                         ></textarea>
                       </div>
                       <div className="mb-2">
-                        <input type="file" name="image" id="image" onChange={handleNewItemChange}/>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Image URL"
+                          name="Image"
+                          value={newItem.Image}
+                          onChange={handleNewItemChange}
+                          required
+                        />
                       </div>
                       <button type="submit" className="btn btn-success">Add Item</button>
                     </form>
+
                     
                     <table className="table table-striped">
                       <thead>
@@ -208,25 +286,37 @@ const AddMenu = () => {
                           <th>Price</th>
                           <th>Description</th>
                           <th>Actions</th>
+                          <th>Update</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {menuData.find(c => c.id === selectedCategory)?.items.map(item => (
-                          <tr key={item.id}>
-                            <td>{item.name}</td>
-                            <td>${item.price.toFixed(2)}</td>
-                            <td>{item.description}</td>
-                            <td>
-                              <button 
-                                className="btn btn-danger btn-sm"
-                                onClick={() => handleRemoveItem(selectedCategory, item.id)}
-                              >
-                                Remove
-                              </button>
-                            </td>
-                          </tr>
+                        {items
+                          .filter(item => item.category === selectedCategory)
+                          .map(item => (
+                            <tr key={item._id}>
+                              <td>{item.Name}</td>
+                              <td>${parseFloat(item.Price).toFixed(2)}</td>
+                              <td>{item.Description}</td>
+                              <td>
+                                <button 
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleRemoveItem(selectedCategory, item._id)}
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                              <td>
+                                <button 
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleUpdateItem(selectedCategory, item._id)}
+                                >
+                                  Update
+                                </button>
+                              </td>
+                            </tr>
                         ))}
                       </tbody>
+
                     </table>
                   </>
                 ) : (
@@ -238,6 +328,81 @@ const AddMenu = () => {
             </div>
           </div>
         </div>
+        {isModalOpen && (
+          <div
+            className="modal-backdrop"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 1050,
+            }}
+          >
+            <div
+              className="modal-content p-4 bg-white rounded"
+              style={{ width: '400px', maxWidth: '90%' }}
+            >
+              <h5 className="mb-3">Update Item</h5>
+              <div className="mb-2">
+                <label>Name</label>
+                <input
+                  type="text"
+                  name="Name"
+                  className="form-control"
+                  value={formData.Name}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="mb-2">
+                <label>Price</label>
+                <input
+                  type="text"
+                  name="Price"
+                  className="form-control"
+                  value={formData.Price}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="mb-2">
+                <label>Description</label>
+                <textarea
+                  name="Description"
+                  className="form-control"
+                  value={formData.Description}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="mb-3">
+                <label>Image URL</label>
+                <input
+                  type="text"
+                  name="Image"
+                  className="form-control"
+                  value={formData.Image}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="d-flex justify-content-end">
+                <button
+                  className="btn btn-secondary me-2"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button className="btn btn-primary" onClick={submitUpdate}>
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </>
   );
