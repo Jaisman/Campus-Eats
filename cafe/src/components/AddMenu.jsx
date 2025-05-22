@@ -121,14 +121,24 @@ const handleAddCategory = async (e) => {
 
   // Remove an item from the selected category
  const handleRemoveItem = async (categoryId, itemId) => {
-  try {
-    await axios.delete(`http://localhost:8080/categories/${categoryId}/items/${itemId}`);
-    alert('Item deleted successfully');
-  } catch (err) {
-    console.error('Failed to delete item:', err);
-    alert('Failed to delete item');
-  }
-};
+    try {
+      await axios.delete(`http://localhost:8080/categories/${categoryId}/items/${itemId}`);
+      alert('Item deleted successfully');
+    } catch (err) {
+      console.error('Failed to delete item:', err);
+      alert('Failed to delete item');
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId) => {
+    try {
+      await axios.delete(`http://localhost:8080/category/delete/${categoryId}`);
+      alert('Category deleted successfully');
+    } catch (err) {
+      console.error('Failed to delete category:', err);
+      alert('Failed to delete category');
+    }
+  };
 
   const handleUpdateItem = (categoryId, itemId) => {
     const itemToEdit = items.find(item => item._id === itemId);
@@ -201,14 +211,26 @@ const submitUpdate = async () => {
                 
                 <div className="list-group">
                   {menuData.map(category => (
-                    <button
-                      key={category._id}
-                      className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${selectedCategory === category.id ? 'active' : ''}`}
-                      onClick={() => handleSelectCategory(category._id)}
-                    >
-                      {category.name}
-                      <span className="badge bg-secondary rounded-pill">{category.Name}</span>
-                    </button>
+                    <>
+                    <div className="d-flex justify-content-between align-items-center mb-2 p-2 border rounded bg-light">
+                      <button
+                        key={category._id}
+                        className={`flex-grow-1 me-2 btn text-start d-flex justify-content-between align-items-center ${selectedCategory === category.id ? 'btn-primary' : 'btn-outline-secondary'}`}
+                        onClick={() => handleSelectCategory(category._id)}
+                      >
+                        {category.name}
+                        <span className="badge bg-secondary rounded-pill">{category.Name}</span>
+                      </button>
+
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleDeleteCategory(category._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+
+                    </>
                   ))}
                 </div>
               </div>

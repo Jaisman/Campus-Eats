@@ -241,3 +241,17 @@ app.put('/items/:itemId', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+app.delete('/category/delete/:categoryId', async (req, res) => {
+  const { categoryId } = req.params;
+  try {
+    const deletedCategory = await Category.findByIdAndDelete(categoryId);
+    if (!deletedCategory) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    res.status(200).json({ message: 'Category deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting category:', err);
+    res.status(500).json({ error: 'Failed to delete category' });
+  }
+});
