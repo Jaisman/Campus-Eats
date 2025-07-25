@@ -6,6 +6,8 @@ import axios from 'axios';
 import bg_menu from '../assets/bg_menu.jpg';
 
 const Menu = () => {
+
+  const role = localStorage.getItem('role');
   const navigate = useNavigate();
   const { cart = [], addToCart } = useCart();
 
@@ -87,6 +89,15 @@ const Menu = () => {
                 </button>
               ))}
             </div>
+
+            {role === 'admin' && (
+              <button
+                className="btn btn-warning mt-4 w-100"
+                onClick={() => navigate('/add')}
+              >
+                Add Category
+              </button>
+            )}
           </div>
 
           {/* Menu Items */}
@@ -121,6 +132,8 @@ const Menu = () => {
                                 <span className="badge bg-primary">${item.Price}</span>
                               </div>
                               <p className="card-text">{item.Description}</p>
+                              {
+                                role==="user"?
                               <div className="d-flex align-items-center">
                                 <button
                                   className="btn btn-sm btn-outline-primary me-2"
@@ -134,6 +147,9 @@ const Menu = () => {
                                   </span>
                                 )}
                               </div>
+                                  :
+                                  <p/>
+                              }
                             </div>
                           </div>
                         </div>
@@ -152,11 +168,13 @@ const Menu = () => {
       </div>
 
       {/* Footer */}
-      <footer className="p-3 text-center">
-        <button className="btn btn-success px-4" onClick={() => navigate('/cart')}>
-          View Cart
-        </button>
-      </footer>
+      {role !== 'admin' && (
+        <footer className="p-3 text-center">
+          <button className="btn btn-success px-4" onClick={() => navigate('/cart')}>
+            View Cart
+          </button>
+        </footer>
+      )}
     </div>
   );
 };

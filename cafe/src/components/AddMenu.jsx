@@ -210,28 +210,26 @@ const submitUpdate = async () => {
                 </form>
                 
                 <div className="list-group">
-                  {menuData.map(category => (
-                    <>
-                    <div className="d-flex justify-content-between align-items-center mb-2 p-2 border rounded bg-light">
-                      <button
-                        key={category._id}
-                        className={`flex-grow-1 me-2 btn text-start d-flex justify-content-between align-items-center ${selectedCategory === category.id ? 'btn-primary' : 'btn-outline-secondary'}`}
-                        onClick={() => handleSelectCategory(category._id)}
+                 {menuData.map(category => (
+                      <div
+                        key={category._id} // <-- Move key here!
+                        className="d-flex justify-content-between align-items-center mb-2 p-2 border rounded bg-light"
                       >
-                        {category.name}
-                        <span className="badge bg-secondary rounded-pill">{category.Name}</span>
-                      </button>
-
-                      <button
-                        className="btn btn-danger"
-                        onClick={() => handleDeleteCategory(category._id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-
-                    </>
-                  ))}
+                        <button
+                          className={`flex-grow-1 me-2 btn text-start d-flex justify-content-between align-items-center ${selectedCategory === category._id ? 'btn-primary' : 'btn-outline-secondary'}`}
+                          onClick={() => handleSelectCategory(category._id)}
+                        >
+                          {category.Name}
+                          <span className="badge bg-secondary rounded-pill">{category.Name}</span>
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => handleDeleteCategory(category._id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
@@ -312,8 +310,8 @@ const submitUpdate = async () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {items
-                          .filter(item => item.category === selectedCategory)
+                        {Array.isArray(items) && items
+                          .filter(item => item && item.category === selectedCategory)
                           .map(item => (
                             <tr key={item._id}>
                               <td>{item.Name}</td>
