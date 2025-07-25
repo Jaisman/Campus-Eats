@@ -24,6 +24,7 @@ export default function Login() {
       const data = await response.json();
       console.log(data);
       if (response.ok) {
+        localStorage.setItem("role",data.user.role);
         localStorage.setItem("authToken", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         alert('Login successful!');
