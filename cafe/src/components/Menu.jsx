@@ -112,47 +112,61 @@ const Menu = () => {
                 {items.length === 0 ? (
                   <div className="alert alert-warning text-center">No items found in this category.</div>
                 ) : (
-                  <div className="row row-cols-2 g-4">
+                  <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 gx-3 gy-3">
+
+
                     {items.map((item) => {
                       const cartItem = cart?.find((cartItem) => cartItem._id === item._id);
                       const quantity = cartItem ? cartItem.quantity : 0;
 
                       return (
-                        <div key={item._id} className="col">
-                          <div className="card h-100 shadow-sm">
-                            <img
-                              src={item.Image}
-                              className="card-img-top"
-                              alt={item.Name}
-                              style={{ height: '180px', objectFit: 'cover' }}
-                            />
-                            <div className="card-body">
-                              <div className="d-flex justify-content-between align-items-center mb-2">
-                                <h5 className="card-title mb-0">{item.Name}</h5>
+                        <div key={item._id} className="col d-flex justify-content-center">
+                          <div className="card shadow-sm" style={{ width: '280px' }}>
+
+                            {/* 4:3 Aspect Ratio (adjusted shorter to ~60%) */}
+                            <div style={{ position: 'relative', width: '100%', paddingTop: '60%', overflow: 'hidden' }}>
+                              <img
+                                src={item.Image}
+                                alt={item.Name}
+                                className="card-img-top"
+                                style={{
+                                  position: 'absolute',
+                                  top: 0,
+                                  left: 0,
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover'
+                                }}
+                              />
+                            </div>
+
+                            <div className="card-body p-3">
+                              <div className="d-flex justify-content-between align-items-center">
+                                <h5 className="card-title mb-0" style={{ fontSize: '1rem' }}>{item.Name}</h5>
                                 <span className="badge bg-primary">${item.Price}</span>
                               </div>
-                              <p className="card-text">{item.Description}</p>
-                              {
-                                role==="user"?
-                              <div className="d-flex align-items-center">
-                                <button
-                                  className="btn btn-sm btn-outline-primary me-2"
-                                  onClick={() => addToCart(item)}
-                                >
-                                  Add to Order
-                                </button>
-                                {quantity > 0 && (
-                                  <span className="badge bg-success px-2 py-1">
-                                    {quantity} in Cart
-                                  </span>
-                                )}
-                              </div>
-                                  :
-                                  <p/>
-                              }
+                              <p className="card-text" style={{ fontSize: '0.9rem' }}>{item.Description}</p>
+
+                              {role === "user" ? (
+                                <div className="d-flex align-items-center">
+                                  <button
+                                    className="btn btn-sm btn-outline-primary me-2"
+                                    onClick={() => addToCart(item)}
+                                  >
+                                    Add to Order
+                                  </button>
+                                  {quantity > 0 && (
+                                    <span className="badge bg-success px-2 py-1">
+                                      {quantity} in Cart
+                                    </span>
+                                  )}
+                                </div>
+                              ) : null}
                             </div>
                           </div>
                         </div>
+
+
                       );
                     })}
                   </div>
