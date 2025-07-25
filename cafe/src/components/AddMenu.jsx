@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import { useMenu } from '../context/MenuContext';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import home_i1 from '../assets/home_i1.jpg';
 
 const AddMenu = () => {
   const [menuData, setMenuData] = useState([]);
@@ -92,6 +93,7 @@ const handleAddCategory = async (e) => {
   const handleNewItemChange = (e) => {
     const { name, value } = e.target;
     setNewItem(prev => ({ ...prev, [name]: value }));
+    console.log(newItem);
   };
     
   // Add new item to the selected category
@@ -185,8 +187,23 @@ const submitUpdate = async () => {
   return (
     <>
       <Navbar />
+      <div
+              style={{
+                backgroundImage: `url(${home_i1})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                filter: 'brightness(0.7)',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: -1, // ensures this div is behind everything else
+              }}
+            />
       <div className="container mt-4">
-        <h1 className="mb-4 text-center">Menu Management</h1>
+        <h1 className="mb-4 text-center text-white">Menu Management</h1>
         
         <div className="row">
           {/* Left Column - Categories */}

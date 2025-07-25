@@ -59,7 +59,7 @@ export default function Home() {
                   <div className="card-body text-center">
                     <h5 className="card-title">Paneer Handi</h5>
                     <p className="card-text">Take it before out of stock</p>
-                    <button className="btn btn-success">360 Rupees</button>
+                    <button className="btn btn-success">360 $</button>
                   </div>
                 </div>
               </div>
@@ -76,7 +76,7 @@ export default function Home() {
                   <div className="card-body text-center">
                     <h5 className="card-title">Farm house Pizza</h5>
                     <p className="card-text">Take it before out of stock</p>
-                    <button className="btn btn-success">399 Rupees</button>
+                    <button className="btn btn-success">399 $</button>
                   </div>
                 </div>
               </div>
@@ -93,7 +93,7 @@ export default function Home() {
                   <div className="card-body text-center">
                     <h5 className="card-title">Fruit Pastry</h5>
                     <p className="card-text">Take it before out of stock</p>
-                    <button className="btn btn-success">89 Rupees</button>
+                    <button className="btn btn-success">89 $</button>
                   </div>
                 </div>
               </div>
